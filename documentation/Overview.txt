@@ -1,0 +1,61 @@
+To build use:
+mvn package
+then the jar is target/sf-1-jar-with-dependencies.jar
+
+To run:
+Make sure you have a jc.properties in the same directory as the jar
+Edit jc.properties to run what you want then do:
+java -jar sf-1-jar-with-dependencies.jar 
+
+Or run sf.sf.App from within your IDE.
+
+Overview:
+This is the most scalable, fastest, and recoverable s3 client in existence as far as I know. 
+Specify the number of concurrent NIO workers you would like. Recover from lost connections and save your progress locally.
+This was built to work with S3 stores with millions of objects in situations where connectivity may be ideal or not ideal.
+
+Architecture overview:
+This is a command line program which can run a number of commands in sequential order. 
+It uses jcommander (http://jcommander.org/) to parse command line commands and properties file commands.
+Commands can be passed in via three methods: 
+1) The first parameters passed into the command line. They have no key, for example:
+	java -jar jarName.jar command1 command2 -someKey=someVal  . The commands are "command1 command2".
+2) The "commands" key/value passed into the command line. "-commands=val". 
+3) The "prop_commands" key/val in the properties file.
+The commands from the command line overwrite all the commands in the properties file.
+The other parameters to the program can be specified in the jc.properties file or via the command line.
+The parameters and commands are documented in the default jc.properties file.
+
+Vert.x(vertx.io) is used to provide scalability and concurrency.
+When downloading from S3 using "get_objects", two properties are used to control concurrency. 
+"num_verticles" specifies how many verticles to run before sleeping the amount specified by "sleep_time".
+"max_requests_get_objects" specifies the maximum amount of verticles created by the get_objects command.
+"list_objects" commands are run sequentially, as the truncation point is figured out from the response.
+The total amount of "list_objects" commands can be controlled by "max_requests_list_objects".
+
+MapDB(www.mapdb.org) is used to keep track of 3 sets. 
+1) The original list of s3 objects we queried for
+2) A list of object still left to download out of the original list
+3) A list of objects downloaded out of the original list
+
+The "list_obbjects" commands appends to the original list of objects and objects left to download.
+The "get_objects" command reads and removes from the list of objects left to download and
+ adds to the list of downloaded objects.
+ All DB sets can be cleared using the "clear_all_sets" command.
+
+The auth and client logic in sf.sf.s3client was initially based on https://github.com/spartango/SuperS3t but has been
+heavily altered.
+
+
+To run and test you can use:
+Scality (zenko) s3 for local development, see document in "other" directory.
+Or one of the large public datasets: https://aws.amazon.com/public-datasets/
+This one has a large amount of small files and is good for testing: https://registry.opendata.aws/amazon-bin-imagery/
+For more information on AWS public datasets: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-public-data-sets.html
+
+
+Also Note AWS S3 endpoints and supported signatures: http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+ 
+
+
+

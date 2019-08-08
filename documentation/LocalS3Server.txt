@@ -1,0 +1,82 @@
+-----------------
+
+Zenko (formerly scality) local s3 server is a docker container that can interact with S3 commands:
+https://www.zenko.io/cloudserver/
+https://github.com/scality/cloudserver
+https://hub.docker.com/r/zenko/cloudserver/
+
+
+The default AWS API access key for the server is accessKey1, with the secret key verySecretKey1
+
+Example commands:
+- Run s3 server with a file backend on port 8000:
+ docker run -d --name s3server_file -p 8000:8000 scality/s3server
+- Run s3 server with an in-memory backend on port 8000:
+ docker run -d --name s3server_mem -p 8000:8000 scality/s3server:mem-latest
+- Note that the --name selected (in the example 's3server') will enable you to easily start and stop the given named container:
+
+ docker stop s3server
+ docker start s3server
+ 
+- To start the server again after a computer restart, start docker then do: 
+ docker start s3server_file
+
+- To ssh into the docker container:  
+ docker exec -it s3server_file bash
+
+
+You can use docker ps -a to see containers you had already exited. Then you can start them again using docker start.
+
+
+To generate sample files see fileGenerator/fileGenerator.sh
+
+
+
+--To set up AWS CLI:
+Create the crentials and config files:
+
+~/.aws/credentials on Linux, OS X, or Unix or C:\Users\USERNAME\.aws\credentials on Windows
+	[default]
+	aws_access_key_id = accessKey1
+	aws_secret_access_key = verySecretKey1
+	
+~/.aws/config on Linux, OS X, or Unix or C:\Users\USERNAME\.aws\config on Windows
+	[default]
+	region = us-east-1
+
+Note: us-east-1 is the default region, but you can specify any region.
+
+--Using AWS CLI:
+
+See all buckets:
+aws s3 ls --endpoint-url=http://localhost:8000
+
+Create bucket:
+aws --endpoint-url=http://localhost:8000 s3 mb s3://mybucket
+
+
+--Other Notes:
+There may still be this issue with list-objects-v2:
+ Continuation-token and start-after are not working - https://github.com/scality/S3/issues/490
+
+"When using s3 server with a file backend, all data is stored inside the container and is persisted between restarts."
+Use it with ssl like:
+https://www.zenko.io/blog/s3-server-with-ssl/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

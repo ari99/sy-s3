@@ -1,0 +1,9 @@
+sf.sf
+sf.sf.bin
+sf.sf.command
+sf.sf.consumer
+sf.sf.s3client
+sf.sf.s3client.util
+sf.sf.storage
+sf.sf.verticle
+sf.sf.verticle.getobject
